@@ -1,3 +1,9 @@
-from django.shortcuts import render
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, throttle_classes
+from .throttles import BurstRateThrottle
 
-# Create your views here.
+@api_view(['GET'])
+@throttle_classes([BurstRateThrottle])
+def api_intensiva(request):
+    # Esta ruta tiene throttling especial
+    return Response({'data': 'información'})

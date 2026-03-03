@@ -37,16 +37,64 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # ← AGREGAR (requerido por allauth)
+    
     # Third-party apps
     'rest_framework',
-    'oauth2_provider',
     'corsheaders',
     'django_filters',
-    
+    'rest_framework_simplejwt',
+    'oauth2_provider',  # ← AGREGAR (Django OAuth Toolkit)
+    'allauth',  # ← AGREGAR
+    'allauth.account',  # ← AGREGAR
+    'allauth.socialaccount',  # ← AGREGAR
+    'allauth.socialaccount.providers.google',  # ← AGREGAR
+    'django_extensions',
     # Tu aplicación
     'libros',
-
+    'graphene_django',
 ]
+
+# ASGI Application
+ASGI_APPLICATION = 'biblioteca_project.asgi.application'
+
+# Channel Layers - Opción 1: Con Redis (RECOMENDADO para producción)
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
+
+# Opción 2: En memoria (SOLO para desarrollo)
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels.layers.InMemoryChannelLayer'
+#     }
+# }
+
+# GraphQL Settings
+GRAPHENE = {
+    'SCHEMA': 'libros.schema.schema',
+    'MIDDLEWARE': [
+        'graphene_django.debug.DjangoDebugMiddleware',
+    ],
+}
+
+# OAuth2 Provider Settings
+OAUTH2_PROVIDER = {
+    'SCOPES': {
+        'read': 'Read scope - Permite leer datos',
+        'write': 'Write scope - Permite escribir datos',
+        'groups': 'Access to groups - Acceso a grupos de usuario'
+    },
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 3600,  # 1 hora
+    'REFRESH_TOKEN_EXPIRE_SECONDS': 86400,  # 1 día
+    'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600,  # 10 minutos
+    'ROTATE_REFRESH_TOKEN': True,
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -57,6 +105,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # ← AGREGAR
+    'libros.middleware.SecurityMiddleware',
+    'libros.middleware.RateLimitMiddleware',
 ]
 
 ROOT_URLCONF = 'biblioteca_project.urls'
@@ -64,7 +115,7 @@ ROOT_URLCONF = 'biblioteca_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # ← AGREGAR esto
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -180,6 +231,19 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
+
+    'DEFAULT_THROTTLE_CLASSES': [
+        'libros.throttles.BurstRateThrottle',
+        'libros.throttles.SustainedRateThrottle',
+    ],
+    
+    'DEFAULT_THROTTLE_RATES': {
+        'burst': '60/min',        # 60 por minuto
+        'sustained': '1000/day',  # 1000 por día
+        'anon_burst': '20/min',   # Anónimos: 20 por minuto
+        'premium': '10000/day',   # Premium: 10000 por día
+    }
+
 }
 
 # =======================
@@ -214,3 +278,109 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',               # Claim que identifica tipo de token
     'JTI_CLAIM': 'jti',                             # JWT ID (identificador único)
 }
+
+# =======================
+# SITE CONFIGURATION
+# =======================
+SITE_ID = 1  # ← AGREGAR
+
+# =======================
+# AUTHENTICATION BACKENDS
+# =======================
+AUTHENTICATION_BACKENDS = [
+    # Backend por defecto de Django (username/password)
+    'django.contrib.auth.backends.ModelBackend',
+    
+    # Backend de allauth para OAuth social
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# =======================
+# DJANGO ALLAUTH CONFIG
+# =======================
+
+# Configuración de cuentas
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False  # Solo email para login social
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'  # Para desarrollo: 'mandatory' en producción
+
+# Configuración de login social
+SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_AUTO_SIGNUP = True  # Crear usuario automáticamente
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # No verificar email en OAuth
+
+# Proveedores OAuth configurados
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'APP': {
+            'client_id': '',  # ← REEMPLAZAR
+            'secret': '',  # ← REEMPLAZAR
+            'key': ''
+        }
+    }
+}
+
+
+# =======================
+# OAUTH 2.0 PROVIDER SETTINGS
+# =======================
+OAUTH2_PROVIDER = {
+    # Tiempo de vida de los tokens
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 3600,
+    'REFRESH_TOKEN_EXPIRE_SECONDS': 86400 * 7,
+    
+    # Scopes disponibles
+    'SCOPES': {
+        'read': 'Acceso de lectura',
+        'write': 'Acceso de escritura',
+    },
+    
+    # TIPO DE MODELO (CORREGIDO): Elimina ".models"
+    'ACCESS_TOKEN_MODEL': 'oauth2_provider.AccessToken', 
+    'REFRESH_TOKEN_MODEL': 'oauth2_provider.RefreshToken',
+}
+
+# Orígenes permitidos para CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://tudominio.com",
+    "https://www.tudominio.com",
+]
+
+# Permitir credenciales
+CORS_ALLOW_CREDENTIALS = True
+
+# Headers permitidos
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# Orígenes confiables para CSRF
+CSRF_TRUSTED_ORIGINS = [
+    "https://tudominio.com",
+    "https://www.tudominio.com",
+]
+
+# Cookie CSRF segura en producción
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_SAMESITE = 'Strict'
+
