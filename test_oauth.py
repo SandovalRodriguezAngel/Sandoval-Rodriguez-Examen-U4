@@ -4,10 +4,17 @@ import requests
 TOKEN_URL = 'http://127.0.0.1:8000/o/token/'
 API_URL = 'http://127.0.0.1:8000/api/libros/'
 
+<<<<<<< HEAD
 CLIENT_ID = 't07SOAsWBCLLoVhjYSq7otZOaEtGbypHnpduMYOP'
 CLIENT_SECRET = 'xrmkxgsriUSPPZwLh8SnIsMEWDzC4Yig3jmWV3mudGeOs2ZeZjhMRoeeWN78fudWZUrx2YoZHLImk0RdbkWJ8Ib1UqW0XbWwHJeMyAu8gZmzji9ialO5dJFQOKLOKL7p'
 USERNAME = 'admin09'
 PASSWORD = 'admin09'
+=======
+CLIENT_ID = '13eHTcpxsA5F33wO9xbFj4KqgNLwfDgbw5jPCmt2'
+CLIENT_SECRET = 'secreto123'
+USERNAME = 'admin123'
+PASSWORD = 'admin123'
+>>>>>>> 4041f2149571fdf36fde29bf1a10148493a5c2cd
 
 print("=== Obteniendo Token OAuth 2.0 ===")
 

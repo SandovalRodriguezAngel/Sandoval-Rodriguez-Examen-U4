@@ -31,7 +31,10 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+<<<<<<< HEAD
     'daphne',  # ← AGREGAR AL PRINCIPIO
+=======
+>>>>>>> 4041f2149571fdf36fde29bf1a10148493a5c2cd
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -65,12 +68,18 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             "hosts": [('127.0.0.1', 6379)],
+<<<<<<< HEAD
             'CONFIG': {
             "hosts": [('127.0.0.1', 6379)],
         },
     },
 }
 }
+=======
+        },
+    },
+}
+>>>>>>> 4041f2149571fdf36fde29bf1a10148493a5c2cd
 
 # Opción 2: En memoria (SOLO para desarrollo)
 # CHANNEL_LAYERS = {
@@ -214,9 +223,14 @@ CORS_ALLOW_CREDENTIALS = True
 REST_FRAMEWORK = {
     # AUTENTICACIÓN: Qué métodos acepta tu API
     'DEFAULT_AUTHENTICATION_CLASSES': [
+<<<<<<< HEAD
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',# ← AGREGAR para OAuth 2.0
         #'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT (Token moderno)
           
+=======
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT (Token moderno)
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',  # ← AGREGAR para OAuth 2.0
+>>>>>>> 4041f2149571fdf36fde29bf1a10148493a5c2cd
         'rest_framework.authentication.TokenAuthentication',          # Token tradicional
         'rest_framework.authentication.SessionAuthentication',        # Sesión (para admin)
     ],
@@ -247,6 +261,7 @@ REST_FRAMEWORK = {
         'sustained': '1000/day',  # 1000 por día
         'anon_burst': '20/min',   # Anónimos: 20 por minuto
         'premium': '10000/day',   # Premium: 10000 por día
+<<<<<<< HEAD
     'DEFAULT_THROTTLE_CLASSES': [
         'libros.throttles.BurstRateThrottle',
         'libros.throttles.SustainedRateThrottle',
@@ -260,6 +275,9 @@ REST_FRAMEWORK = {
     }
 }
     
+=======
+    }
+>>>>>>> 4041f2149571fdf36fde29bf1a10148493a5c2cd
 
 }
 
@@ -401,6 +419,7 @@ if not DEBUG:
     CSRF_COOKIE_HTTPONLY = True
     CSRF_COOKIE_SAMESITE = 'Strict'
 
+<<<<<<< HEAD
 
 # Solo para PRODUCCIÓN (no desarrollo)
 if not DEBUG:
@@ -460,3 +479,5 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     CSRF_COOKIE_HTTPONLY = True
     CSRF_COOKIE_SAMESITE = 'Strict'
+=======
+>>>>>>> 4041f2149571fdf36fde29bf1a10148493a5c2cd
